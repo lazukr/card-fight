@@ -1,0 +1,19 @@
+{
+  "name": "cardfight",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lazukr/card-fight.git"
+  },
+  "author": "lazukr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lazukr/card-fight/issues"
+  },
+  "homepage": "https://github.com/lazukr/card-fight#readme"
+}
