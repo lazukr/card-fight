@@ -15,5 +15,12 @@
   "bugs": {
     "url": "https://github.com/lazukr/card-fight/issues"
   },
-  "homepage": "https://github.com/lazukr/card-fight#readme"
+  "homepage": "https://github.com/lazukr/card-fight#readme",
+  "dependencies": {
+    "express": "^4.15.4",
+    "phaser": "^2.6.2",
+    "phaser-input": "^1.2.6",
+    "socket.io": "^2.0.3",
+    "winston": "^2.3.1"
+  }
 }

@@ -1,0 +1,50 @@
+{
+    "rules" : {
+        "title": "Game Rules",
+        "text": {
+            "0": ["Gameplay:",
+                "  Each player takes turns matching the enemy's cards.",
+                "  The first player is determined by the rank of the card on the top of the deck.",
+                "  The player with the higher rank goes first.",
+                "  First player puts the top card used face down on the top of the deck.",
+                "  Second player puts the top card used back into the deck and shuffles it."
+            ],
+            "1": ["Setup:",
+                "  Each player shuffles their deck until they are satisfied.",
+                "  Place 14 cards face down from the top of the deck in a 7 x 2 grid.",
+                "  Put the rest of the deck to the left of this grid."
+            ],
+            "2": ["Shuffles:",
+                "  Before the game begins, each player may employ as many shuffles as they wish.",
+                "  The following are the shuffles available to the player:",
+                "    - riffle",
+                "    - cuts",
+                "    - overhand"
+            ],
+            "3": ["Win Condition:",
+                "  When one player has cleared their enemy's cards, they are the winner."
+            ],
+            "4": ["Turn Sequence:",
+                "  During your turn the following happens",
+                "    - If the enemy has matched a pair during their turn, there will be gaps in your grid.",
+                "      Push all the cards clockwise ending at the bottom left.",
+                "      Add new cards from the top of the deck face down to the top left",
+                "      until you have 14 faced down cards",
+                "    - You must choose two of your opponent's faced down cards",
+                "       - In the event they are not a match, they are flipped back face down.",
+                "       - In the evnet they are a match, remove them from the game, add 1 point to your score.",
+                "    <optional>",
+                "       Take one card in your grid and place it onto the bottom of the deck.",
+                "       Move all the cards clockwise.",
+                "       Draw the top card FACE UP and place it on the top left.",
+                "       During your next turn, this card will be flipped face down."
+            ]
+        }
+    },
+    "title" : {
+        "title": "Card Fight"       
+    },
+    "wait": {
+        "title": "Waiting"
+    }
+}
