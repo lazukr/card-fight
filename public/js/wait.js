@@ -9,12 +9,12 @@ var waitState = {
         title.anchor.set(0.5, 0.5);
 
         var waitFunction = function() {
-            index++;
-            title.text = waitText['title'] + waitDots[index % waitDots.length];
+            index = (index + 1) % waitDots.length;
+            title.text = waitText['title'] + waitDots[index];
         }
 
-        Client.ready();
+        Client.readyToShuffle();
 
-        game.time.events.loop(Phaser.Timer.SECOND, waitFunction, this);
+        game.time.events.loop(Phaser.Timer.SECOND*0.5, waitFunction, this);
     }
 }

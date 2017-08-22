@@ -21,53 +21,71 @@ const logger = new (winston.Logger)({
 
 logger.level = 'debug';
 
-/*var match = {
-    p1: {
-        id: null,
-        board: [],
-        deck: []
-    },
-    p2: {
-        id: null,
-        board: [],
-        deck: []
-    }
-};*/
-
-match = null;
+match = game();
 
 io.on('connection', function(socket) {
     logger.info('Client %s has connected', socket.id);
 
-    socket.on('ready', function() {
-        if (match == null) {
-            match = game(socket);
-            logger.info('Game initialized');
-            logger.info('Current players: %s', match.getPlayers());
-        } else if (match.getPlayers().length < 2) {
+    socket.on('ready-shuffle', function() {
+        if (match.getLength() == 0) {
             match.addPlayers(socket);
-            logger.info('Current players: %s', match.getPlayers());
+            logger.info('Current players: %s', match.getPlayersID());
+        } else if (match.getLength() < 2 && match.getPlayersID() != socket.id) {
+            match.addPlayers(socket);
+            logger.info('Current players: %s', match.getPlayersID());
             match.shuffleStage();
         }
     });
 
+    socket.on('ready-play', function(deck) {
+
+        deck.forEach(function(card) {
+            logger.info(card);
+        });
+
+        match.updateReady(1);
+        logger.info(match.getReady());
+
+        if(match.getReady() == 2) {
+            sendToClients('playing');
+        }
+
+    });
+
+
+    socket.on('disconnect', function() {
+
+        if (match != null) {
+            match.removePlayer(socket);
+            logger.info(match.getPlayersID());
+            match.updateReady(-1);
+            logger.info(match.getReady());
+            sendToClients('waiting');
+        }
+    });
+
 });
+
+var sendToClients = function(emitKey) {
+    var curMatchData = match.getData();
+    for (var i = 0; i < match.getLength(); i++) {
+        curMatchData[i].socket.emit(emitKey);
+        logger.info('socket emit to %s with key %s', curMatchData[i].socket.id, emitKey);
+    }
+};
 
 
 server.listen(8101, function() {
     logger.info('Server listening on port 8101');
 });
 
-function game(player0) {
+function game() {
 
-    var matchData = [{
-        socket: player0,
-        board: null, 
-        deck: null,
-    }];
+    var matchData = [];
+    var ready = 0;
 
     return {
-        getPlayers: function() {
+        getPlayersID: function() {
             var playerids = [];
 
             matchData.forEach(function(player) {
@@ -77,12 +95,36 @@ function game(player0) {
             return playerids;
         },
 
+        getLength: function() {
+            return matchData.length;
+        },
+
+        getData: function() {
+            return matchData;
+        },
+
         addPlayers: function(player) {
             matchData.push({
                 socket: player,
                 board: null,
                 deck: null,
+                ready: false
             })
+        },
+
+        removePlayer: function(player) {
+
+            var index = -1;
+            for (var i = 0; i < matchData.length; i++) {
+                if (matchData[i].socket == player) {
+                    logger.info("matched: %s at index %s", player, i);
+                    var index = i;
+                }
+            };
+
+            if (index > -1){
+                matchData.splice(index, 1);
+            };
         },
 
         shuffleStage: function() {
@@ -91,8 +133,16 @@ function game(player0) {
 
             matchData.forEach(function(player, index) {
                 player.colour = colours[index];
-                player.socket.emit('ready-reply' ,player.colour);
-            })
+                player.socket.emit('begin-shuffle' ,player.colour);
+            });
+        },
+
+        updateReady: function(val) {
+            ready = ready < 0 ? 0 : ready + val;
+        },
+
+        getReady: function() {
+            return ready;
         }
     }
 }

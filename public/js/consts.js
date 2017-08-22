@@ -28,3 +28,13 @@ TEN = 10;
 JACK = 11;
 QUEEN = 12;
 KING = 13;
+
+// card positioning
+RANK_X = 29;
+RANK_Y = 15;
+SUIT_X = 29;
+SUIT_Y = 71;
+
+// tint etc
+BTN_TINT_ENBL = 0x00ff88;
+BTN_TINT_DSBL = 0x006636;

@@ -33,8 +33,8 @@ var ruleState = {
             update();
         }
 
-        var backButton = addButton(75, game.height-50, 'button', backFunction, 0x0000ff, navBack);
-        var nextButton = addButton(game.width-75, game.height-50, 'button', nextFunction, 0x000ff, navNext);
+        var backButton = addButton(75, game.height-50, 'button', backFunction, BTN_TINT_ENBL, navBack);
+        var nextButton = addButton(game.width-75, game.height-50, 'button', nextFunction, BTN_TINT_ENBL, navNext);
         update();
 
     }
