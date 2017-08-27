@@ -13,7 +13,7 @@ var ruleState = {
 
         var update = function() {
             rulesParagraph.text = rulesText['text'][rulesPage.toString()].join('\n');
-            nextButton.setText(rulesPage == 4 ? 'Ready' : 'Next');
+            nextButton.setText(rulesPage == 4 ? 'Return' : 'Next');
             backButton.visible(rulesPage == 0 ? false : true);
         }
 
@@ -28,7 +28,7 @@ var ruleState = {
             if (rulesPage < 4) {
                 rulesPage++;
             } else if (rulesPage == 4) {
-                game.state.start('wait');
+                game.state.start('title');
             }
             update();
         }

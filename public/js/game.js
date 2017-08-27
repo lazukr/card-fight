@@ -1,6 +1,11 @@
 var game = new Phaser.Game(1280, 720, Phaser.AUTO, 'game', {
-    create: create
+    create: create,
+    preload: preload
 });
+
+function preload() {
+    game.stage.disableVisibilityChange = true;
+};
 
 function create() {
 
@@ -12,4 +17,6 @@ function create() {
     game.state.add('wait', waitState);
     game.state.add('title', titleState);
     game.state.start('boot');
+
+    game.players = addPlayers();
 };

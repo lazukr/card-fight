@@ -35,6 +35,32 @@ RANK_Y = 15;
 SUIT_X = 29;
 SUIT_Y = 71;
 
+// deck spreads
+ROW = 0;
+LOOP = 1;
+//COLLAPSE = 2; for collapse, set offsets to 0.
+
 // tint etc
 BTN_TINT_ENBL = 0x00ff88;
 BTN_TINT_DSBL = 0x006636;
+
+// board consts
+
+CNST_BRD = {
+    self: {
+        deck_x: 25,
+        deck_y: 355,
+        board_x: 175, 
+        board_y: 355
+    },
+    enemy: {
+        deck_x: 1115,
+        deck_y: 165,
+        board_x: 965,
+        board_y: 165
+    }
+}
+
+// tween modes
+INSTANT = 0;
+CHAINED = 1;

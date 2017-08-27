@@ -9,6 +9,19 @@ Client.readyToPlay = function(deck) {
     Client.socket.emit('ready-play', deck);
 };
 
+Client.deal = function(amount) {
+    Client.socket.emit('init-deal', amount);
+};
+
+Client.flipCard = function(data) {
+    Client.socket.emit('flip-card', data);
+};
+
+Client.socket.on('card-flipped', function(cardID) {
+    console.log('card-flipped');
+    game.players.getAllCards()[cardID].flip();
+});
+
 Client.socket.on('begin-shuffle', function(colour) {
 
     game.state.start('shuffle', true, false, colour);
@@ -16,13 +29,10 @@ Client.socket.on('begin-shuffle', function(colour) {
 
 });
 
-Client.socket.on('waiting', function() {
-    game.state.start('wait');
+Client.socket.on('title', function() {
+    game.state.start('title');
 });
 
-Client.socket.on('playing', function(myDeck, enemyDeck) {
-    game.state.start('play', true, false, {
-        myDeck: myDeck,
-        enemyDeck: enemyDeck
-    });
+Client.socket.on('playing', function(data) {
+    game.state.start('play', true, false, data.decks, data.boards);
 });

@@ -1,16 +1,14 @@
-function addCard(x, y, face, rank, suit) {
-
+function addCard(x, y, face, rank, suit, linked) {
+    var linked = linked ? linked : false;
     var cardFace = face;
     var card = game.add.sprite(x, y, 'card');
-    var cardRank = game.add.sprite(x+RANK_X, y+RANK_Y, 'ranks');
-    var cardSuit = game.add.sprite(x+SUIT_X, y+SUIT_Y, 'suits');
-    var tweens = [];
-
-    card.frame = cardFace;    
-    cardRank.frame = rank;
-    cardSuit.frame = suit;
+    var cardRank = card.addChild(game.add.sprite(RANK_X, RANK_Y, 'ranks', rank));
+    var cardSuit = card.addChild(game.add.sprite(SUIT_X, SUIT_Y, 'suits', suit));
     cardRank.tint = suit < 3 ? 0x000000 : 0xffffff;
-    
+    var tween;
+    var cardString = String(suit) + "-" + String(rank);
+
+
     var update = function () {
         card.frame = cardFace;
         cardRank.visible = card.frame == 1 ? true : false;
@@ -18,81 +16,58 @@ function addCard(x, y, face, rank, suit) {
         cardFace = cardFace == 0 ? 1 : 0;
     };
 
-    var button = game.add.button(x, y, 'cardButton', update, this, 1, 0, 2);
+    var flip = function() {
+        update();
+        if (linked) {
+            console.log('linked test: %s', linked);
+            Client.flipCard({
+                player: game.players.getSelf().colour,
+                cardID: cardString
+            });
+        }
+    }
+
+    var button = card.addChild(game.add.button(0, 0, 'cardButton', flip, this, 1, 0, 2));
     update();
 
     return {
 
-        setRank: function(rank) {
-            cardRank.frame = rank;
-        },
-
-        getRank: function() {
-            return cardRank.frame;
-        },
-
-        setSuit: function(suit) {
-            cardSuit.frame = suit;
-        },
-
-        getSuit: function() {
-            return cardSuit.frame;
-        },
-
-        unknownify: function() {
-            cardRank.frame = UNKNOWN;
-            cardSuit.frame = UNKNOWN;
+        getCard: function() {
+            return {
+                rank: cardRank.frame,
+                suit: cardSuit.frame,
+                face: card.frame
+            };
         },
 
         setXY: function(newX, newY) {
             card.x = newX;
             card.y = newY;
-            button.x = newX;
-            button.y = newY;
-            cardRank.x = newX + RANK_X;
-            cardRank.y = newY + RANK_Y;
-            cardSuit.x = newX + SUIT_X;
-            cardSuit.y = newY + SUIT_Y;
-        },
-
-        sendToBack: function() {
-            button.sendToBack();
-            cardRank.sendToBack();
-            cardSuit.sendToBack();
             card.sendToBack();
         },
 
-        getTweens: function() {
-            return tweens;
+        getTween: function() {
+            return tween;
         },
 
-        addTween: function(newX, newY, prevTween) {
+        addTween: function(newX, newY, speed, prevTween) {
             var distance = Phaser.Math.distance(card.x, card.y, newX, newY);
-            var duration = distance / 5;
+            var duration = distance / speed;
 
             button.visible = false;
+            tween = game.add.tween(card).to({x:newX, y:newY}, duration);
+            tween.onComplete.add(function() {
+                button.visible = true;
+            });
 
-            tweens = [
-                game.add.tween(card).to({x:newX, y:newY}, duration),
-                game.add.tween(cardRank).to({x:newX + RANK_X, y:newY + RANK_Y}, duration),
-                game.add.tween(cardSuit).to({x:newX + SUIT_X, y:newY + SUIT_Y}, duration),
-            ];
-
-            button.x = newX;
-            button.y = newY;
-
-            if (prevTween.length > 0) {
-                tweens.forEach(function(tween, index) {
-                    tween.chain(prevTween[index]);
-                });
+            if (prevTween) {
+                tween.chain(prevTween);
             }
-
         },
 
         startTween: function() {
-            tweens.forEach(function(tween) {
-                tween.start();
-            });
+            tween.start();
+            card.sendToBack();
         },
 
         draw: function(bool) {
@@ -100,6 +75,10 @@ function addCard(x, y, face, rank, suit) {
             cardRank.visible = bool;
             cardSuit.visible = bool;
             button.visible = bool;
+        },
+
+        flip: function() {
+            update();
         }
     }
 
@@ -112,38 +91,81 @@ function addDeck(x, y, offsetX, offsetY, rowSpread) {
     var offsetX = offsetX;
     var offsetY = offsetY;
     var rowSpread = rowSpread;
+    var spreadMode = ROW;
 
-    var update = function() {
-        deck.forEach(function(card, index) {
-            card.setXY(posX + (index % rowSpread)*offsetX, posY + Math.floor(index / rowSpread)*offsetY);
-            card.sendToBack();
-        });
+    var update = function(animation, speed) {
+
+
+
+        var dx, dy;
+        var speed = speed ? speed : 10;
+
+        if (spreadMode == LOOP) {
+            dx = function(i) {
+                return offsetX*(i - (2*(i % rowSpread) + 1)*Math.floor(i/rowSpread));
+            };
+            dy = function(i) {
+                return offsetY*Math.floor(i / rowSpread);
+            };
+
+        } else {
+            dx = function(i) {
+                return offsetX*(i % rowSpread);
+            };
+            dy = function(i) {
+                return offsetY*Math.floor(i / rowSpread);
+            };
+        }
+
+        if (animation) {
+            deck.forEach(function(card, index) {
+                if (index > 0) {
+                    card.addTween(posX + dx(index), posY + dy(index), speed, deck[index-1].getTween());
+                } else {
+                    card.addTween(posX + dx(index), posY + dy(index), speed);
+                }
+            });
+
+        } else {
+            deck.forEach(function(card, index) {
+                card.setXY(posX + dx(index), posY + dy(index));
+            });
+        }
     };
 
-    var addTween = function(x, y) {
-
-        deck.forEach(function(card, index) {
-            if (index > 0) {
-                card.addTween(x, y, deck[index-1].getTweens());
-            } else {
-                card.addTween(x, y, []);
-            }
-        });
-    }
-
     return {
-        add: function(card) {
+        add: function(face, rank, suit) {
+            deck.push(addCard(posX, posY, face, rank, suit));
+        },
+
+        addExistingCard: function(card) {
             deck.push(card);
         },
 
-        pop: function() {
-            deck.pop(card);
+        addCards: function(inputDeck, linked) {
+            var linked = linked ? linked : false;
+            for (var i = 0; i < inputDeck.length; i++) {
+                deck.push(addCard(posX, posY, inputDeck[i].face, inputDeck[i].rank, inputDeck[i].suit, linked));    
+            }
         },
 
-        collapse: function(x, y, callback) {
-            addTween(x, y);
-            deck[0].getTweens()[0].onComplete.add(callback);
-            deck[deck.length-1].startTween();
+        pop: function() {
+            return deck.pop();
+        },
+
+        collapse: function(animation, callback) {
+            update(animation);
+            if (animation) {
+                deck[0].getTween().onComplete.add(callback);
+                deck[deck.length-1].startTween();
+            }
+        },
+
+        deal: function(animation, speed) {
+            update(animation, speed);
+            if (animation) {
+                deck[deck.length-1].startTween();
+            }
         },
 
         update: function() {
@@ -163,21 +185,33 @@ function addDeck(x, y, offsetX, offsetY, rowSpread) {
 
         flip: function() {
             deck.reverse();
+            deck.forEach(function(card) {
+                card.flip();
+            });
         },
 
         getValues: function() {
             var values = [];
-
             deck.forEach(function(card) {
-                values.push({
-                    rank: card.getRank(),
-                    suit: card.getSuit()
-                });
+                values.push(card.getCard());
             });
-
             return values;
-        }
+        },
 
+        setSpread: function(spread) {
+            spreadMode = spread;
+        },
+
+        setPosition: function(x, y, dx, dy) {
+            posX = x;
+            posY = y;
+            offsetX = typeof dx === 'undefined' ? offsetX : dx;
+            offsetY = typeof dy === 'undefined' ? offsetY : dy;
+        },
+
+        getCards: function() {
+            return deck;
+        }
 
     }
 }
