@@ -1,20 +1,29 @@
-var waitState = {
+var Wait = function(game) {};
 
-
+Wait.prototype = {
     create: function() {
 
-        var title = game.add.text(game.width/2, game.height/2, waitText['title']);
-        var index = 0;
-        var waitDots = ['', '.', '..', '...'];
-        title.anchor.set(0.5, 0.5);
+        // get JSON Text
+        this.JSONText = getJSONText('wait');
+        
+        // define index and dots
+        this.index = 0;
+        this.dots = ['', '.', '..', '...'];
 
-        var waitFunction = function() {
-            index = (index + 1) % waitDots.length;
-            title.text = waitText['title'] + waitDots[index];
-        }
+        // display text
+        this.waitText = game.add.text(game.width/2, game.height/2, this.JSONText['title']);
+        this.waitText.anchor.setTo(0.5, 0.5);
 
+        // add event loop that appends dots onto wait text
+        game.time.events.loop(Phaser.Timer.SECOND*0.5, this.wait, this);
+
+        // tell server client is ready to move onto shuffling
         Client.readyToShuffle();
+    },
 
-        game.time.events.loop(Phaser.Timer.SECOND*0.5, waitFunction, this);
+    wait: function() {
+
+        this.index = (this.index + 1) % 4;
+        this.waitText.text = this.JSONText['title'] + this.dots[this.index];
     }
 }

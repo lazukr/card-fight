@@ -1,31 +1,33 @@
-function addButton(x, y, type, callback, tint, text) {
+var LabelButton = function(game, x, y, label, tint, callback, callbackContext) {  
+    Phaser.Button.call(this, game, x, y, 'button', callback, callbackContext, 1, 2, 0); 
+    this.label = new Phaser.Text(game, 0, 0, label);
+    this.addChild(this.label);
+    this.setLabel(label);
 
-    var button = game.add.button(x, y, type, callback, this, 1, 2, 0);
-    var text = game.add.text(x, y, text);
-    button.tint = tint;
+    this.anchor.setTo(0.5, 0.5);
+    this.label.anchor.setTo(0.5, 0.5);
+    this.tint = tint[0];
+    
+    // private variable for toggling between tints
+    var _tint = tint;
 
-    button.anchor.set(0.5, 0.5);
-    text.anchor.set(0.5, 0.5);
-
-    return {
-
-        setText: function(newText) {
-            text.text = newText;
+    // defines a property that updates inputEnabled and tint automatically
+    Object.defineProperty(this, "enabled", {
+        set: function(value) {
+            this.inputEnabled = value;
+            this.tint = _tint[+value];
         },
-
-        visible: function(bool) {
-            button.visible = bool;
-            text.visible = bool;
-        },
-
-        disable: function() {
-            button.inputEnabled = false;
-            button.tint = BTN_TINT_DSBL;
-        },
-
-        enable: function() {
-            button.inputEnabled = true;
-            button.tint = BTN_TINT_ENBL;
+        get: function() {
+            return this.inputEnabled;
         }
-    }
-}
+    });
+
+    // add to game
+    game.add.existing(this);
+};
+
+LabelButton.prototype = Object.create(Phaser.Button.prototype);
+LabelButton.prototype.constructor = LabelButton;
+LabelButton.prototype.setLabel = function(label) {    
+    this.label.setText(label);
+};

@@ -41,25 +41,22 @@ LOOP = 1;
 //COLLAPSE = 2; for collapse, set offsets to 0.
 
 // tint etc
-BTN_TINT_ENBL = 0x00ff88;
-BTN_TINT_DSBL = 0x006636;
+BTN_TINTS = [0x00ff88, 0x006636];
 
 // board consts
 
-CNST_BRD = {
-    self: {
-        deck_x: 25,
-        deck_y: 355,
-        board_x: 175, 
-        board_y: 355
-    },
-    enemy: {
-        deck_x: 1115,
-        deck_y: 165,
-        board_x: 965,
-        board_y: 165
-    }
-}
+MY_DECK_X = 25;
+MY_DECK_Y = 355;
+MY_BOARD_X = 175;
+MY_BOARD_Y = 355;
+
+EN_DECK_X = 1115;
+EN_DECK_Y = 165;
+EN_BOARD_X = 965;
+EN_BOARD_Y = 165;
+
+BOARD_DX = 105;
+BOARD_DY = 145;
 
 // tween modes
 INSTANT = 0;

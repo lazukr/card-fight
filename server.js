@@ -27,12 +27,12 @@ io.on('connection', function(socket) {
     logger.info('Client %s has connected', socket.id);
 
     socket.on('ready-shuffle', function() {
-        if (match.getLength() < 2 && match.getPlayersID() != socket.id) {
+        if (match.getData().length < 2 && match.getPlayersID() != socket.id) {
             match.addPlayers(socket);
             logger.info('Current players: %s', match.getPlayersID());
         }
 
-        if (match.getLength() == 2) {
+        if (match.getData().length == 2) {
             match.shuffleStage();
         }
     });
@@ -43,7 +43,7 @@ io.on('connection', function(socket) {
             logger.info(card);
         });
 
-        match.updateReady(1);
+        match.updateReady();
         match.setDeck(socket, deck);
 
         tempCards = match.getAllCards();
@@ -61,29 +61,81 @@ io.on('connection', function(socket) {
             sendToClients('playing', {
                 decks: decks,
                 boards: boards
-                });
+            });
         }
     });
 
     socket.on('flip-card', function(data) {
         var allCards = match.getAllCards();
-        logger.info("key: %s, card: %s", data.cardID, JSON.stringify(allCards[data.cardID]));
-        match.getData()[+!data.player].socket.emit('card-flipped', data.cardID);
+        allCards[data.suit][data.rank].face = data.face;
+        match.getData()[+!data.player].socket.emit('card-flipped', allCards[data.suit][data.rank]);
+    });
+
+    socket.on('check-card', function(data) {
+
+        var checkCards = match.getCheckCards();
+
+        checkCards.push({
+            id: data.id,
+            rank: data.rank
+        });
+        logger.info(checkCards);
+
+        if (checkCards.length == 2) {
+            var card1 = checkCards[0].rank;
+            var card2 = checkCards[1].rank;
+            var turn = -1;
+            var first = -1;
+
+            if (card1 > card2) {
+                logger.debug(card1>card2);
+                turn = checkCards[0].id;
+                first = 0;
+            } else if (card2 < card1) {
+                logger.debug(card1<card2);
+                turn = checkCards[1].id;
+                first = 1;
+            } else {
+                logger.debug('test');
+                turn = 0;
+            }
+            match.setTurn(turn);
+            sendToClients('initial-turn', {
+                turn: turn,
+                first: first
+            });
+        }
+
+    });
+
+    socket.on('remove-from-board', function(data) {
+
+        var board = match.getData()[+!data.player].board;
+        var grave = match.getData()[+!data.player].board
+
+        for (var i = 0; i < board.length; i++) {
+            if(board[i] === data.values[0] || board[i] === data.values[1]) {
+                board.splice(i, 1);
+                grave.push(allCards[board[i].suit][board[i].rank]);
+            }
+        }
+
+        match.dealToBoard(socket, 2);
+
+        sendToClients('board-update', data.values);
 
     });
 
     socket.on('disconnect', function() {
-        match.updateReady(0);
         sendToClients('title');
-        match.removeAllPlayers();
-        
+        match.reset();
     });
 
 });
 
 var sendToClients = function(emitKey, items) {
     var curMatchData = match.getData();
-    for (var i = 0; i < match.getLength(); i++) {
+    for (var i = 0; i < curMatchData.length; i++) {
         curMatchData[i].socket.emit(emitKey, items);
         logger.info('socket emit to %s with key %s', curMatchData[i].socket.id, emitKey, items);
     }
@@ -95,10 +147,24 @@ server.listen(8101, function() {
 });
 
 function game() {
-
+    var turn = -1;
     var matchData = [];
     var ready = 0;
-    var allCards = {};
+    var listCards = [];
+    var checkCards = [];
+    listCards.push([]);
+
+    for (var suit = 1; suit < 5; suit++) {
+        listCards.push([]);
+        listCards[suit].push(null);
+        for (var rank = 1; rank < 14; rank++) {
+            listCards[suit].push({
+                rank: rank,
+                suit: suit,
+                face: 0
+            });
+        }
+    }
 
     var find = function(player) {
 
@@ -126,10 +192,6 @@ function game() {
             return playerids;
         },
 
-        getLength: function() {
-            return matchData.length;
-        },
-
         getData: function() {
             return matchData;
         },
@@ -138,8 +200,10 @@ function game() {
             matchData.push({
                 socket: player,
                 board: [],
-                deck: []
+                deck: [],
+                grave: []
             })
+
         },
 
         setDeck: function(player, deck) {
@@ -148,23 +212,13 @@ function game() {
                 logger.info("deck set at: %s", index);
 
                 for (var i = 0; i < deck.length; i++) {
-
-                    var key = String(deck[i].suit) + "-" + String(deck[i].rank);
                     matchData[index].deck.push(deck[i]);
-                    allCards[key] = matchData[index].deck[i];
-                    logger.debug(allCards[key] === matchData[index].deck[i]);
                 }
             }
         },
 
-        dealToBoard: function(player, amount) {
-            var index = find(player);
-
-            if (index > -1) {
-                for (var i = 0; i < amount; i++) {
-                    matchData[index].board.push(matchData[index].deck.pop());
-                }
-            }
+        setTurn: function(curTurn) {
+            turn = curTurn;
         },
 
         getDecks: function() {
@@ -190,48 +244,54 @@ function game() {
             return boards;
         },
 
-        removePlayer: function(player) {
-
-            var index = find(player);
-            
-            if (index > -1){
-                logger.info("player removed at: %s", index);
-                matchData.splice(index, 1);
-            }
-        },
-
-        removeAllPlayers: function() {
-
-            matchData = [];
-        },
-
-        shuffleStage: function() {
-
-            matchData.forEach(function(player, index) {
-                player.socket.emit('begin-shuffle' , index);
+        getGraves: function() {
+            var graves = [];
+            matchData.forEach(function(player) {
+                graves.push(player.grave);
             });
+            logger.debug(graves);
+
+            return graves;
         },
 
-        updateReady: function(val) {
-            ready = val ? ready + val : 0;
-        },
 
         getReady: function() {
             return ready;
         },
 
         getAllCards: function() {
+            return listCards;
+        },
 
-            return allCards;
-            /*var tempArray = [];
-            for (var key in allCards){
-                tempArray.push({
-                    key: key,
-                    value: allCards[key]
-                });
-            };
+        getCheckCards: function() {
+            return checkCards;
+        },
 
-            return tempArray;*/
+        reset: function() {
+            matchData = [];
+            checkCards = [];
+            turn = -1;
+            ready = 0;
+        },
+
+        shuffleStage: function() {
+            matchData.forEach(function(player, index) {
+                player.socket.emit('begin-shuffle' , index);
+            });
+        },
+
+        updateReady: function() {
+            ready++;
+        },
+
+        dealToBoard: function(player, amount) {
+            var index = find(player);
+
+            if (index > -1) {
+                for (var i = 0; i < amount; i++) {
+                    matchData[index].board.push(matchData[index].deck.pop());
+                }
+            }
         }
     }
 }

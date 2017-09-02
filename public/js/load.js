@@ -13,16 +13,9 @@ var loadState = {
         game.load.spritesheet('cardButton', '/assets/cardButton.png', 100, 140);
         game.load.spritesheet('button', '/assets/button.png', 100, 50);
         game.load.json('text', '/js/text.json');
-
-
-
     },
 
     create: function() {
-
-        rulesText = game.cache.getJSON('text')['rules'];
-        titleText = game.cache.getJSON('text')['title'];
-        waitText = game.cache.getJSON('text')['wait'];
 
         game.state.start('title');
     }

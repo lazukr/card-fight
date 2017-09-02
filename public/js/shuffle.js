@@ -11,7 +11,7 @@ var shuffleState = {
 
             shuffleButton.disable();
             deck.setPosition(25, 390, 0, 0);
-            deck.collapse(CHAINED, function() {
+            deck.update(CHAINED, 10, function() {
                 deck.flip();
                 Client.readyToPlay(deck.getValues());
             });
@@ -20,10 +20,11 @@ var shuffleState = {
 
         var deck = addDeck(50, 50, 90, 165, 13);
         var selfColour = game.players.getSelf().colour;
+        console.log("selfColour: %s", selfColour);
 
         for (var j = 0 + selfColour*2; j < 2 + selfColour*2; j++) {
             for (var i = 0; i < 13; i++) {
-                deck.add(UP, i+1, j+1);
+                deck.addNewCard(UP, i+1, j+1);
             }
         }
 

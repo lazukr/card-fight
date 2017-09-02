@@ -11,12 +11,12 @@ function create() {
 
     game.state.add('boot', bootState);
     game.state.add('load', loadState);
-    game.state.add('rules', ruleState);
+    game.state.add('rules', Rules);
     game.state.add('shuffle', shuffleState);
     game.state.add('play', playState);
-    game.state.add('wait', waitState);
-    game.state.add('title', titleState);
+    game.state.add('wait', Wait);
+    game.state.add('title', Title);
     game.state.start('boot');
 
-    game.players = addPlayers();
+    //game.players = addPlayers();
 };
