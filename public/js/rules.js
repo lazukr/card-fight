@@ -30,7 +30,7 @@ Rules.prototype = {
     },
 
     next: function() {
-        if (this.page != 4) {
+        if (this.page < 4) {
             this.page++;
             this._update();
         } else {
