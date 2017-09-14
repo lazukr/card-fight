@@ -9,14 +9,13 @@ function preload() {
 
 function create() {
 
-    game.state.add('boot', bootState);
-    game.state.add('load', loadState);
+    game.state.add('boot', Boot);
+    game.state.add('load', Load);
     game.state.add('rules', Rules);
-    game.state.add('shuffle', shuffleState);
-    game.state.add('play', playState);
+    game.state.add('shuffle', Shuffle);
+    game.state.add('play', Play);
     game.state.add('wait', Wait);
     game.state.add('title', Title);
-    game.state.start('boot');
 
-    //game.players = addPlayers();
+    game.state.start('boot');
 };

@@ -17,31 +17,31 @@ Rules.prototype = {
         this.rulesParagraph.anchor.setTo(0.5, 0);
 
         // define buttons
-        this.backButton = new LabelButton(game, 75, game.height-50, 'Back', BTN_TINTS, this.back, this);
-        this.nextButton = new LabelButton(game, game.width-75, game.height-50, 'Next', BTN_TINTS, this.next, this);
-        this._update();
+        this.backButton = new Button(game, 75, game.height-50, 'Back', this.back, this);
+        this.nextButton = new Button(game, game.width-75, game.height-50, 'Next', this.next, this);
+        this.returnButton = new Button(game, game.width-75, game.height-50, 'Return', this.title, this);
+        this.buttonUpdate();
     },
 
     back: function() {
         if (this.page) {
             this.page--;
-            this._update();
+            this.buttonUpdate();
         }
     },
 
     next: function() {
         if (this.page < 4) {
             this.page++;
-            this._update();
-        } else {
-            this.title();
+            this.buttonUpdate();
         }
     },
 
-    _update: function() {
+    buttonUpdate: function() {
         this.rulesParagraph.text = this.JSONText['' + this.page].join('\n');
-        this.backButton.visible = !this.page ? false : true;
-        this.nextButton.setLabel(this.page == 4 ? 'Return' : 'Next');
+        this.backButton.visible = this.page ? true : false;
+        this.nextButton.visible = this.page < 4 ? true : false;
+        this.returnButton.visible = this.page == 4 ? true : false;
     },
 
     title: function() {

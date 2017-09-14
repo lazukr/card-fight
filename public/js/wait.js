@@ -17,8 +17,7 @@ Wait.prototype = {
         // add event loop that appends dots onto wait text
         game.time.events.loop(Phaser.Timer.SECOND*0.5, this.wait, this);
 
-        // tell server client is ready to move onto shuffling
-        Client.readyToShuffle();
+        Client.matchmaking();
     },
 
     wait: function() {

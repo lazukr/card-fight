@@ -1,4 +1,17 @@
-var shuffleState = {
+var Shuffle = function(game) {};
+
+Shuffle.prototype = {
+    init: function() {
+
+    },
+
+    create: function() {
+
+    }
+};
+
+
+/*var shuffleState = {
 
     init: function(colour) {
 
@@ -34,4 +47,4 @@ var shuffleState = {
         var readyButton = addButton(game.width - 75, game.height - 50, 'button', ready, BTN_TINT_ENBL, 'Ready');
 
     }
-}
+}*/

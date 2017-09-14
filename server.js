@@ -3,7 +3,9 @@ var express = require('express'),
     http = require('http'),
     server = http.createServer(app),
     io = require('socket.io')(server),
-    winston = require('winston');
+    logger = require('./logger'),
+    EVENT = require('./game-state-consts').eventList,
+    Game = require('./game');
 
 app.use('/js', express.static(__dirname + '/public/js'));
 app.use('/assets', express.static(__dirname + '/public/assets'));
@@ -11,142 +13,35 @@ app.use('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');
 });
 
-const logger = new (winston.Logger)({
-    transports: [
-        new (winston.transports.Console)({
-            colorize: true
-        })
-    ]
-});
+game = new Game();
 
-logger.level = 'debug';
-
-match = game();
 
 io.on('connection', function(socket) {
     logger.info('Client %s has connected', socket.id);
 
-    socket.on('ready-shuffle', function() {
-        if (match.getData().length < 2 && match.getPlayersID() != socket.id) {
-            match.addPlayers(socket);
-            logger.info('Current players: %s', match.getPlayersID());
-        }
-
-        if (match.getData().length == 2) {
-            match.shuffleStage();
-        }
+    socket.on('queue', function() {
+        logger.info('Client %s is now waiting in queue for matchmaking.', socket.id);
+        game.update(EVENT.ONQUEUE, socket);
     });
 
-    socket.on('ready-play', function(deck) {
-
-        deck.forEach(function(card) {
-            logger.info(card);
-        });
-
-        match.updateReady();
-        match.setDeck(socket, deck);
-
-        tempCards = match.getAllCards();
-
-        for (var key in tempCards) {
-            logger.info("key: %s, data: %s", key, JSON.stringify(tempCards[key]));
-        }
-
-        match.dealToBoard(socket, 14);
-        logger.info("ready: %s", match.getReady());
-
-        if(match.getReady() == 2) {
-            var decks = match.getDecks();
-            var boards = match.getBoards();
-            sendToClients('playing', {
-                decks: decks,
-                boards: boards
-            });
-        }
-    });
-
-    socket.on('flip-card', function(data) {
-        var allCards = match.getAllCards();
-        allCards[data.suit][data.rank].face = data.face;
-        match.getData()[+!data.player].socket.emit('card-flipped', allCards[data.suit][data.rank]);
-    });
-
-    socket.on('check-card', function(data) {
-
-        var checkCards = match.getCheckCards();
-
-        checkCards.push({
-            id: data.id,
-            rank: data.rank
-        });
-        logger.info(checkCards);
-
-        if (checkCards.length == 2) {
-            var card1 = checkCards[0].rank;
-            var card2 = checkCards[1].rank;
-            var turn = -1;
-            var first = -1;
-
-            if (card1 > card2) {
-                logger.debug(card1>card2);
-                turn = checkCards[0].id;
-                first = 0;
-            } else if (card2 < card1) {
-                logger.debug(card1<card2);
-                turn = checkCards[1].id;
-                first = 1;
-            } else {
-                logger.debug('test');
-                turn = 0;
-            }
-            match.setTurn(turn);
-            sendToClients('initial-turn', {
-                turn: turn,
-                first: first
-            });
-        }
-
-    });
-
-    socket.on('remove-from-board', function(data) {
-
-        var board = match.getData()[+!data.player].board;
-        var grave = match.getData()[+!data.player].board
-
-        for (var i = 0; i < board.length; i++) {
-            if(board[i] === data.values[0] || board[i] === data.values[1]) {
-                board.splice(i, 1);
-                grave.push(allCards[board[i].suit][board[i].rank]);
-            }
-        }
-
-        match.dealToBoard(socket, 2);
-
-        sendToClients('board-update', data.values);
-
-    });
 
     socket.on('disconnect', function() {
-        sendToClients('title');
-        match.reset();
+        logger.info('Client %s has disconnected from the game', socket.id);
+        game.update(EVENT.ONPLAYERDISCONNECT);
     });
 
+
 });
-
-var sendToClients = function(emitKey, items) {
-    var curMatchData = match.getData();
-    for (var i = 0; i < curMatchData.length; i++) {
-        curMatchData[i].socket.emit(emitKey, items);
-        logger.info('socket emit to %s with key %s', curMatchData[i].socket.id, emitKey, items);
-    }
-};
-
 
 server.listen(8101, function() {
     logger.info('Server listening on port 8101');
 });
 
-function game() {
+
+
+
+
+/*function game() {
     var turn = -1;
     var matchData = [];
     var ready = 0;
@@ -294,4 +189,4 @@ function game() {
             }
         }
     }
-}
+}*/
