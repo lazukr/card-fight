@@ -64,11 +64,11 @@ Wait.prototype = {
 
         botCard.face = +!botCard.face;
 
-        botCardTween = this.tweenLeft(botCard, this.leftDelta, this.rightDelta);
-        topCardTween = this.tweenRight(topCard, this.leftDelta, this.rightDelta);
+        botCardTween = this.tweenLeft(botCard, this.dxLeft, this.dxRight);
+        topCardTween = this.tweenRight(topCard, this.dxLeft, this.dxRight);
 
-        botCardReverseTween = this.tweenRight(botCard, this.leftDelta, this.rightDelta);
-        topCardReverseTween = this.tweenLeft(topCard, this.leftDelta, this.rightDelta);
+        botCardReverseTween = this.tweenRight(botCard, this.dxLeft, this.dxRight);
+        topCardReverseTween = this.tweenLeft(topCard, this.dxLeft, this.dxRight);
 
         botCardTween.chain(botCardReverseTween);
         topCardTween.chain(topCardReverseTween);
