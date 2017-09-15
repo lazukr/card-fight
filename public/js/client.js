@@ -1,7 +1,7 @@
 var Client = {}
 Client.socket = io.connect();
 
-Client.matchmaking = function() {
+Client.queue = function() {
     Client.socket.emit('queue');
 };
 
