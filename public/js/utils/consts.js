@@ -41,7 +41,16 @@ LOOP = 1;
 //COLLAPSE = 2; for collapse, set offsets to 0.
 
 // tint etc
-BTN_TINTS = [0x00ff88, 0x006636];
+BTN_TINT = {
+    enabled: 0x00ff88, 
+    disabled: 0x006636
+};
+
+CARD_TINT = {
+    onDown: 0xFFAAAA, 
+    onOver: 0xAAFFAA,
+    onOut: 0xFFFFFF
+};
 
 // board consts
 

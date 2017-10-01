@@ -8,7 +8,6 @@ Client.queue = function() {
 Client.socket.on('disconnect', function() {
     game.state.start('title');
 });
-
-Client.socket.on('opponent-disconnected', function() {
-    game.state.start('title');
+Client.socket.on('op-disconnect', function() {
+    game.state.start('title', true, false, getJSONText('disconnect')['op-disconnect']);
 });

@@ -14,15 +14,15 @@ var CardGroup = function(game) {
 
     // setting mouse interactions for the cards
     this.onChildInputDown.add(function(card) {
-        card.tint = 0xFFAAAA;
+        card.tint = CARD_TINT.onDown;
         card.face = +!card.face;
         //console.log(this.getAll('face', 0));
     }, this);
     this.onChildInputOver.add(function(card) {
-        card.tint = 0xAAFFAA;
+        card.tint = CARD_TINT.onOver;
     }, this);
     this.onChildInputOut.add(function(card) {
-        card.tint = 0xFFFFFF;
+        card.tint = CARD_TINT.onOut;
     }, this);
 };
 

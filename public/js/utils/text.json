@@ -47,5 +47,9 @@
     },
     "wait": {
         "title": "Waiting"
+    },
+
+    "disconnect": {
+        "op-disconnect": "Your opponent has disconnected the game."
     }
 }

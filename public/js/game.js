@@ -5,6 +5,7 @@ var game = new Phaser.Game(1280, 720, Phaser.AUTO, 'game', {
 
 function preload() {
     game.stage.disableVisibilityChange = true;
+    game.config.setForceTimeOut = true;
 };
 
 function create() {

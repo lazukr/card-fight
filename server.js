@@ -5,8 +5,8 @@ var express = require('express'),
     server = http.createServer(app),
     io = require('socket.io')(server),
     logger = require('./logger'),
-    EVENT = require('./game-state-consts').eventList,
-    Game = require('./game');
+    EVENT = require('./game/game-state-consts').eventList,
+    Game = require('./game/game');
 
 app.use('/js', express.static(__dirname + '/public/js'));
 app.use('/assets', express.static(__dirname + '/public/assets'));
@@ -26,11 +26,20 @@ io.on('connection', function(socket) {
 
 
     socket.on('disconnect', function() {
-        logger.info('Client %s has disconnected from the game', socket.id);
-        game.update(EVENT.ONPLAYERDISCONNECT);
+        logger.info('Client %s has disconnected', socket.id);
+        //logger.debug('%s %s', socket.id, game.playerList);
+
+        var playerList = game.playerList;
+
+        // check to make sure disconnected socket is part of the game queue list
+        // else ignore
+        playerList.forEach(function(player) {
+            if (player.socket == socket) {
+                logger.debug('A match has been found, %s', socket.id);
+                game.update(EVENT.ONPLAYERDISCONNECT);
+            }
+        });
     });
-
-
 });
 
 server.listen(8101, function() {

@@ -13,13 +13,13 @@ var Button = function(game, x, y, label, callback, callbackContext) {
 
     this.anchor.setTo(0.5, 0.5);
     this.label.anchor.setTo(0.5, 0.5);
-    this.tint = BTN_TINTS[0];
+    this.tint = BTN_TINT.enabled;
 
     // defines a property that updates inputEnabled and tint automatically
     Object.defineProperty(this, "enabled", {
         set: function(value) {
             this.inputEnabled = value;
-            this.tint = BTN_TINTS[+!value];
+            this.tint = this.tint === BTN_TINT.enabled ? BTN_TINT.disabled : BTN_TINT.enabled;
         },
         get: function() {
             return this.inputEnabled;

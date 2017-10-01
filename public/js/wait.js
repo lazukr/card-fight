@@ -27,7 +27,7 @@ Wait.prototype = {
         for(var i = this.numberOfCards; i--;) {
             var currentSuit = randomIntegerFromInterval(1 , 4);
             var currentRank = randomIntegerFromInterval(1, 13);
-            this.cardGroup.add(new Card(game, 0, 0, currentSuit, currentRank, DOWN));
+            this.cardGroup.add(new CardSprite(game, 0, 0, currentSuit, currentRank, DOWN));
         }
 
         // center cardGroup
@@ -45,14 +45,14 @@ Wait.prototype = {
         Client.queue();
     },
 
-    tweenLeft: function(card, dxLeft, dxRight) {
+    tweenLeft: function(card, dxLeft) {
 
         var leftTween = game.add.tween(card);
         leftTween.to({x: dxLeft}, 735, "Linear");
         return leftTween;
     },
 
-    tweenRight: function(card, dxLeft, dxRight) {
+    tweenRight: function(card, dxRight) {
         var rightTween = game.add.tween(card);
         rightTween.to({x: dxRight}, 735, "Linear");
         return rightTween;
@@ -64,11 +64,11 @@ Wait.prototype = {
 
         botCard.face = +!botCard.face;
 
-        botCardTween = this.tweenLeft(botCard, this.dxLeft, this.dxRight);
-        topCardTween = this.tweenRight(topCard, this.dxLeft, this.dxRight);
+        botCardTween = this.tweenLeft(botCard, this.dxLeft);
+        topCardTween = this.tweenRight(topCard, this.dxRight);
 
-        botCardReverseTween = this.tweenRight(botCard, this.dxLeft, this.dxRight);
-        topCardReverseTween = this.tweenLeft(topCard, this.dxLeft, this.dxRight);
+        botCardReverseTween = this.tweenRight(botCard, this.dxRight);
+        topCardReverseTween = this.tweenLeft(topCard, this.dxLeft);
 
         botCardTween.chain(botCardReverseTween);
         topCardTween.chain(topCardReverseTween);
