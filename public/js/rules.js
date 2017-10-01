@@ -1,42 +1,56 @@
-var ruleState = {
+var Rules = function(game) {};
+
+Rules.prototype = {
+
+    init: function() {
+
+        // get JSON text
+        var JSONText = getJSONText('rules');
+        this.title = JSONText['title'];
+        this.text = JSONText['text'];
+
+        // define page variable
+        this.page = 0;
+
+    },
 
     create: function() {
 
-        
-        var rulesPage = 0;
-        var rulesTitle = game.add.text(game.width/2, game.height/5, rulesText['title']);
-        var rulesParagraph = game.add.text(game.width/2, game.height/5 + 20, rulesText['text'][rulesPage.toString()].join('\n'));
-        rulesTitle.anchor.set(0.5, 0.5);
-        rulesParagraph.anchor.set(0.5, 0);
-        var navBack = 'Back';
-        var navNext = 'Next';
+        // display text
+        this.rulesText = game.add.text(game.width/2, game.height/5, this.title);
+        this.rulesParagraph = game.add.text(game.width/2, game.height/5 + 20, this.text[this.page].join('\n'));
+        this.rulesText.anchor.setTo(0.5, 0.5);
+        this.rulesParagraph.anchor.setTo(0.5, 0);
 
-        var update = function() {
-            rulesParagraph.text = rulesText['text'][rulesPage.toString()].join('\n');
-            nextButton.setText(rulesPage == 4 ? 'Ready' : 'Next');
-            backButton.visible(rulesPage == 0 ? false : true);
+        // define buttons
+        this.backButton = new Button(game, 75, game.height-50, 'Back', this.back, this);
+        this.nextButton = new Button(game, game.width-75, game.height-50, 'Next', this.next, this);
+        this.returnButton = new Button(game, game.width-75, game.height-50, 'Return', this.toTitle, this);
+        this.pageUpdate();
+    },
+
+    back: function() {
+        if (this.page) {
+            this.page--;
+            this.pageUpdate();
         }
+    },
 
-        var backFunction = function() {
-            if (rulesPage > 0) {
-                rulesPage--;
-            }
-            update();
+    next: function() {
+        if (this.page < 4) {
+            this.page++;
+            this.pageUpdate();
         }
+    },
 
-        var nextFunction = function() {
-            if (rulesPage < 4) {
-                rulesPage++;
-            } else if (rulesPage == 4) {
-                game.state.start('wait');
-            }
-            update();
-        }
+    pageUpdate: function() {
+        this.rulesParagraph.text = this.text[this.page].join('\n');
+        this.backButton.visible = this.page ? true : false;
+        this.nextButton.visible = this.page < 4 ? true : false;
+        this.returnButton.visible = this.page == 4 ? true : false;
+    },
 
-        var backButton = addButton(75, game.height-50, 'button', backFunction, 0x0000ff, navBack);
-        var nextButton = addButton(game.width-75, game.height-50, 'button', nextFunction, 0x000ff, navNext);
-        update();
-
+    toTitle: function() {
+        game.state.start('title');
     }
-
-};
+}

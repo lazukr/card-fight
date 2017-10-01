@@ -1,15 +1,22 @@
 var game = new Phaser.Game(1280, 720, Phaser.AUTO, 'game', {
-    create: create
+    create: create,
+    preload: preload
 });
+
+function preload() {
+    game.stage.disableVisibilityChange = true;
+    game.config.setForceTimeOut = true;
+};
 
 function create() {
 
-    game.state.add('boot', bootState);
-    game.state.add('load', loadState);
-    game.state.add('rules', ruleState);
-    game.state.add('shuffle', shuffleState);
-    game.state.add('play', playState);
-    game.state.add('wait', waitState);
-    game.state.add('title', titleState);
+    game.state.add('boot', Boot);
+    game.state.add('load', Load);
+    game.state.add('rules', Rules);
+    game.state.add('shuffle', Shuffle);
+    game.state.add('play', Play);
+    game.state.add('wait', Wait);
+    game.state.add('title', Title);
+
     game.state.start('boot');
 };

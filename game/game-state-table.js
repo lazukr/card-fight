@@ -1,0 +1,20 @@
+var S = require('./game-state-consts').stateList,
+    A = require('./game-state-consts').actionList;
+
+module.exports = Object.freeze({
+    // STATE TRANSITIONS
+    stateTransitionTable: [
+    //  IDLE, WAITSHUFFLE, SHUFFLE, WAITPLAY, PLAY, PLAYER0, PLAYER1
+        [S.IDLE, S.IDLE, S.IDLE, S.IDLE, S.IDLE, S.IDLE, S.IDLE], // ONPLAYERDISCONNECT
+        [S.WAITSHUFFLE, S.SHUFFLE, S.SHUFFLE, S.WAITPLAY, S.PLAY, S.PLAYER0, S.PLAYER1], // ONQUEUE
+        [S.IDLE, S.WAITSHUFFLE, S.WAITPLAY, S.PLAY, S.PLAY, S.PLAYER0, S.PLAYER1] //ONSHUFFLECOMPLETE
+    ],
+    // ACTIONS
+    transitionActionTable: [
+    //  IDLE, WAITSHUFFLE, SHUFFLE, WAITPLAY, PLAY, PLAYER0, PLAYER1
+        [A.RESET, A.RESET, A.RESET, A.RESET, A.RESET, A.RESET, A.RESET], // ONPLAYERDISCONNECT
+        [A.ADDPLAYER, A.ADDPLAYER, A.NONE, A.NONE, A.NONE, A.NONE, A.NONE], // ONQUEUE
+        [A.NONE, A.NONE, A.ADDDECK, A.ADDDECK, A.NONE, A.NONE, A.NONE] //ONSHUFFLECOMPLETE
+    ]
+
+});

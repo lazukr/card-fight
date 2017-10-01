@@ -1,13 +1,13 @@
 var Client = {}
 Client.socket = io.connect();
 
-Client.ready = function() {
-    Client.socket.emit('ready');
+Client.queue = function() {
+    Client.socket.emit('queue');
 };
 
-Client.socket.on('ready-reply', function(colour) {
-
-    game.state.start('shuffle', true, false, colour);
-    console.log(colour);
-
+Client.socket.on('disconnect', function() {
+    game.state.start('title');
+});
+Client.socket.on('op-disconnect', function() {
+    game.state.start('title', true, false, getJSONText('disconnect')['op-disconnect']);
 });
