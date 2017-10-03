@@ -43,26 +43,7 @@ var Game = function() {
 
 Game.prototype.constructor = Game;
 
-Game.prototype.addPlayer = function(socket, colour) {
-    logger.debug('action: add-player');
-
-    logger.debug('print current player list');
-    this.playerList.forEach(function(player) {
-        logger.debug(player.id);
-    });
-
-    if (this.playerList.length < this.maxPlayers) {
-        this.playerList.push(new Player(socket, colour));
-        game.turn++;
-    } else {
-        logger.debug('already at %s, did not add new player', this.maxPlayers);
-        return;
-    }
-
-    logger.debug(this.playerList.length);
-
-};
-
+// RESET
 Game.prototype.reset = function(id) {
 
     this.playerList.forEach(function(player) {
@@ -71,7 +52,26 @@ Game.prototype.reset = function(id) {
     this.playerList = [];
     this.playerDeckList  = [];
     this.playerBoardList = [];
-    game.turn = 0;
+    this.turn = 0;
+};
+
+// ADDPLAYER
+Game.prototype.addPlayer = function(socket) {
+
+    if (this.playerList.length < this.maxPlayers) {
+        logger.info('player with id %s has been added into playerList with colour %s', socket.id, this.turn);
+        this.playerList.push(new Player(socket, this.turn));
+        this.turn++;
+    } else {
+        logger.info('PlayerList already has %s players, new player was not added', this.maxPlayers);
+    }
+};
+
+// STARTPLAY
+
+Game.prototype.startPlay = function(socket) {
+    this.addPlayer(socket);
+
 };
 
 Game.prototype.update = function(event, args) {
@@ -86,11 +86,13 @@ Game.prototype.update = function(event, args) {
             break;
 
         case ACTION.ADDPLAYER:
-            game.addPlayer(args, game.turn);
+            logger.debug('action: add-player');
+            game.addPlayer(args);
             break;
 
-        case ACTION.ADDDECK:
-            logger.debug('action add-deck');
+        case ACTION.STARTPLAY:
+            logger.debug('action: start-play');
+            game.startPlay(args);
             break;
             
         default: // NONE
