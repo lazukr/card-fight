@@ -20,7 +20,7 @@ io.on('connection', function(socket) {
     logger.info('Client %s has connected', socket.id);
 
     socket.on('queue', function() {
-        logger.info('Client %s is now waiting in queue for matchmaking.', socket.id);
+        logger.info('Client %s is attempting to join queue.', socket.id);
         game.update(EVENT.ONQUEUE, socket);
     });
 
